@@ -14,6 +14,7 @@ import org.modelmapper.TypeMap;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -36,12 +37,23 @@ public class UserMapper implements Mapper<User, RegisterReq> {
 
     @Override
     public RegisterReq toDTO(User entity) {
-        return null;
+        String role = entity.getRole().getCode();
+        String gender = entity.getGender().getValue();
+        ModelMapper modelMapper = new ModelMapper();
+        TypeMap<User, RegisterReq> typeMap =  modelMapper.createTypeMap(User.class,RegisterReq.class);
+        typeMap.addMappings(mapping->mapping.map(src->role,RegisterReq::setRole));
+
+        typeMap.addMappings(mapping->mapping.map(src->gender,RegisterReq::setGender));
+        RegisterReq userRes =  modelMapper.map(entity,RegisterReq.class);
+
+        return  userRes;
     }
 
     @Override
     public List<RegisterReq> toDTOList(List<User> entityList) {
-        return null;
+        return  entityList.stream()
+                .map(user -> toDTO(user))
+                .collect(Collectors.toList());
     }
 
     @Override

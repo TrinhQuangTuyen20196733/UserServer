@@ -2,19 +2,26 @@ package com.example.UserService.service;
 
 import com.example.UserService.config.Keycloaks;
 
-import com.example.UserService.constant.RoleConstant;
+import com.example.UserService.dto.request.ChangePasswordReq;
 import com.example.UserService.dto.request.RegisterReq;
-import com.example.UserService.dto.request.RoleReq;
+import com.example.UserService.dto.request.UpdateUserReq;
 import com.example.UserService.entity.Role;
+import com.example.UserService.entity.User;
+import com.example.UserService.exception.BusinessLogicException;
+import com.example.UserService.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.admin.client.resource.RoleMappingResource;
+import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.common.util.Time;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
@@ -24,7 +31,11 @@ import java.util.Collections;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class KeycloakService {
+
+
+    private  final  Keycloaks keycloaks;
     @Value("${keycloak.realm}")
     private String realm;
 
@@ -42,7 +53,7 @@ public class KeycloakService {
     private  String clientSecret;
 
     public List<UserRepresentation> searchUserByEmail(String email) {
-        Keycloak keycloak = Keycloaks.getKeycloakInstance();
+        Keycloak keycloak = keycloaks.getKeycloakInstance();
         try {
 
             List<UserRepresentation> userRepresentations = keycloak.realm(realm).users().list();
@@ -64,14 +75,14 @@ public class KeycloakService {
 
     public  void  createUser(RegisterReq registerReq){
 
-        String accessToken = null;
+
         String email = registerReq.getEmail();
 
         if (!ObjectUtils.isEmpty(searchUserByEmail(email))) {
             throw  new RuntimeException("Email của bạn đã được sử dụng");
         }
 
-        Keycloak keycloak = Keycloaks.getKeycloakInstance();
+        Keycloak keycloak = keycloaks.getKeycloakInstance();
         UsersResource userResource = keycloak.realm(realm).users();
         CredentialRepresentation passwordCredential = new CredentialRepresentation();
         passwordCredential.setTemporary(false);
@@ -105,7 +116,8 @@ public class KeycloakService {
     public void createRole(Role roleReq) {
 
 
-            Keycloak keycloak = Keycloaks.getKeycloakInstance();
+
+        Keycloak keycloak = keycloaks.getKeycloakInstance();
 
 
             RealmResource realmResource = keycloak.realm(realm);
@@ -121,7 +133,8 @@ public class KeycloakService {
     }
 
     public  void  deleteUserByEmail(String email) {
-        Keycloak keycloak = Keycloaks.getKeycloakInstance();
+
+        Keycloak keycloak = keycloaks.getKeycloakInstance();
         UsersResource userResource = keycloak.realm(realm).users();
         UserRepresentation user = new UserRepresentation();
         userResource.get(email).remove();
@@ -137,6 +150,34 @@ public class KeycloakService {
                 clientSecret);
         String accessToken = keycloak.tokenManager().getAccessTokenString();
         return accessToken;
+    }
+
+    public void changePassword(ChangePasswordReq changePasswordReq) {
+        Keycloak keycloak = keycloaks.getKeycloakInstance();
+        String email = null;
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (!ObjectUtils.isEmpty(authentication))  {
+            email = (String)authentication.getPrincipal();
+        }
+        UsersResource userResource = keycloak.realm(realm).users();
+
+
+        UserRepresentation existingUserRepresentation = userResource.search(email).stream().findFirst()
+                .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
+
+
+        UserResource existingUser = userResource.get(existingUserRepresentation.getId());
+
+
+        CredentialRepresentation newPasswordCredential = new CredentialRepresentation();
+        newPasswordCredential.setTemporary(false);
+        newPasswordCredential.setType(CredentialRepresentation.PASSWORD);
+        newPasswordCredential.setValue(changePasswordReq.getNewPassword());
+
+
+        existingUser.resetPassword(newPasswordCredential);
+
+
     }
 
 }

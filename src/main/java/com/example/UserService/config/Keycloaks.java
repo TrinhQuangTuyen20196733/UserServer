@@ -1,31 +1,40 @@
 package com.example.UserService.config;
 
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.keycloak.admin.client.Keycloak;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
+@Component
+@AllArgsConstructor
+@NoArgsConstructor
+@Data
 public class Keycloaks {
     @Value("${keycloak.realm}")
-    private static String realm;
+    private  String realm;
     @Value("${keycloak.auth-server-url}")
-    private static String serverUrl;
+    private  String serverUrl;
 
     @Value("${keycloak.username}")
-    private static String username;
+    private  String username;
     @Value("${keycloak.password}")
-    private static String password;
+    private  String password;
     @Value("${keycloak.resource}")
-    private static String clientId;
+    private  String clientId;
 
     @Value("${keycloak.credentials.secret}")
-    private static String clientSecret;
-    public static Keycloak getKeycloakInstance() {
+    private  String clientSecret;
+    public  Keycloak getKeycloakInstance() {
         return Keycloak.getInstance(
-                "http://localhost:7080",
-                "master",
-                "admin",
-                "admin",
-                "HustApp",
-                "LGeqHvV7k08hF69m2aRgpe16XF1cvkgJ");
+                serverUrl,
+                realm,
+                username,
+                password,
+                clientId,
+                clientSecret);
     }
 }
