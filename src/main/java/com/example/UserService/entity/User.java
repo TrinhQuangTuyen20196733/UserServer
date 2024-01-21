@@ -3,12 +3,11 @@ package com.example.UserService.entity;
 import com.example.UserService.enum_constant.Gender;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
 
 
 @Entity
@@ -36,9 +35,8 @@ public class User extends  BaseEntity {
 
     private  String avatarLocation;
 
-    @Min(5)
-    @Max(100)
-    private int age;
+    @Column(name = "birth_day")
+    private Date birthDay;
 
     @Enumerated(EnumType.STRING)
     private Gender gender;

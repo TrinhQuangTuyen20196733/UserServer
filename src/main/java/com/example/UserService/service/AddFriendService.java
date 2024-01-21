@@ -1,7 +1,6 @@
 package com.example.UserService.service;
 
-import com.example.UserService.dto.request.RegisterReq;
-import com.example.UserService.entity.User;
+import com.example.UserService.dto.UserDTO;
 
 import java.util.List;
 
@@ -12,5 +11,7 @@ public interface AddFriendService {
 
     void cancel(long userId);
 
-    List<RegisterReq> getPending(long userId);
+    List<UserDTO> getPending();
+
+    List<UserDTO> getFriend();
 }

@@ -1,8 +1,12 @@
 package com.example.UserService.controller;
 
+import com.example.UserService.dto.PageDTO;
+import com.example.UserService.dto.UserDTO;
+import com.example.UserService.dto.UserDetailDTO;
 import com.example.UserService.dto.request.ChangePasswordReq;
-import com.example.UserService.dto.request.RegisterReq;
 import com.example.UserService.dto.request.UpdateUserReq;
+import com.example.UserService.dto.request.UploadAvatarReq;
+import com.example.UserService.dto.request.UserSearchReq;
 import com.example.UserService.dto.response.MessagesResponse;
 import com.example.UserService.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +19,7 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/getUserInfor")
-    public RegisterReq getUserInFor() {
+    public UserDTO getUserInFor() {
         return userService.getCurrentUser();
     }
     @PutMapping
@@ -42,4 +46,26 @@ public class UserController {
         }
         return  ms;
     }
+    @PostMapping("/api/search")
+    public PageDTO<UserDTO> GetLists(@RequestBody UserSearchReq userSearchReq){
+        return  userService.search(userSearchReq);
+    }
+
+    @GetMapping("/{userId}")
+    public UserDetailDTO getById(@PathVariable long userId) {
+        return  userService.getUserById(userId);
+    }
+    @PostMapping("/uploadAvatar")
+    public MessagesResponse getById(@RequestBody UploadAvatarReq uploadAvatarReq) {
+        MessagesResponse ms = new MessagesResponse();
+        try {
+            userService.uploadAvatar(uploadAvatarReq);
+        }
+        catch (Exception ex) {
+          ms.code = 5000;
+          ms.message = ex.getMessage();
+        }
+return  ms;
+    }
+
 }

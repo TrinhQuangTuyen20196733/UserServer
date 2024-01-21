@@ -46,11 +46,23 @@ public class FriendShipControlller {
         }
         return  ms;
     }
-    @GetMapping("/pending/{userId}")
-    public MessagesResponse getPending(@PathVariable long userId) {
+    @GetMapping("/pending")
+    public MessagesResponse getPending() {
         MessagesResponse ms = new MessagesResponse();
         try {
-           ms.data= addFriendService.getPending(userId);
+           ms.data= addFriendService.getPending();
+        }
+        catch (Exception e) {
+            ms.code=500;
+            ms.message=e.getMessage();
+        }
+        return  ms;
+    }
+    @GetMapping("/friend")
+    public MessagesResponse getFriend() {
+        MessagesResponse ms = new MessagesResponse();
+        try {
+            ms.data= addFriendService.getFriend();
         }
         catch (Exception e) {
             ms.code=500;

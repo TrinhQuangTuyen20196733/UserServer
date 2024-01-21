@@ -1,7 +1,7 @@
 package com.example.UserService.service.impl;
 
 import com.example.UserService.constant.FriendShipStatus;
-import com.example.UserService.dto.request.RegisterReq;
+import com.example.UserService.dto.UserDTO;
 import com.example.UserService.entity.FriendShip;
 import com.example.UserService.entity.User;
 import com.example.UserService.exception.BusinessLogicException;
@@ -74,7 +74,7 @@ public class AddFriendServiceImpl implements AddFriendService {
     }
 
     @Override
-    public List<RegisterReq> getPending(long userId) {
+    public List<UserDTO> getPending() {
         String email = EmailUtils.getCurrentUser();
         if (ObjectUtils.isEmpty(email)) {
             throw new BusinessLogicException();
@@ -82,10 +82,32 @@ public class AddFriendServiceImpl implements AddFriendService {
         List<FriendShip> friendShipList = friendShipRepository.findPendingFriend(email)
                 .orElseThrow(() -> new BusinessLogicException());
         if (ObjectUtils.isEmpty(friendShipList)) {
+            return null;
+        }
+        List<User> users =  friendShipList.stream()
+                .map(friendShip -> friendShip.getSendFriend())
+
+                .collect(Collectors.toList());
+        return userMapper.toDTOList(users);
+    }
+
+    @Override
+    public List<UserDTO> getFriend() {
+        String email = EmailUtils.getCurrentUser();
+        if (ObjectUtils.isEmpty(email)) {
+            throw new BusinessLogicException();
+        }
+        List<FriendShip> friendShipList = friendShipRepository.findAllFriend(email)
+                .orElseThrow(() -> new BusinessLogicException());
+        if (ObjectUtils.isEmpty(friendShipList)) {
             throw new BusinessLogicException();
         }
         List<User> users =  friendShipList.stream()
-                .map(friendShip -> friendShip.getAcceptFriend())
+                .map(friendShip ->  {
+                    if (friendShip.getAcceptFriend().getEmail().equals(email)) {
+                        return friendShip.getSendFriend();
+                    } else return friendShip.getAcceptFriend();
+                })
 
                 .collect(Collectors.toList());
         return userMapper.toDTOList(users);

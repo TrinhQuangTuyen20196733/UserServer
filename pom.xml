@@ -151,6 +151,10 @@
 			<artifactId>jjwt-jackson</artifactId>
 			<version>0.11.5</version>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-openfeign</artifactId>
+		</dependency>
 
 	</dependencies>
 	<dependencyManagement>
@@ -177,7 +181,7 @@
 				<version>3.3.2</version>
 				<configuration>
 					<to>
-						<image>tuyenhaitan/${project.artifactId}:s7</image>
+						<image>tuyenhaitan/${project.artifactId}:s14</image>
 					</to>
 				</configuration>
 			</plugin>

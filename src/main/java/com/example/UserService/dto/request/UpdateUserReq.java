@@ -5,12 +5,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class UpdateUserReq {
 
-    private int id;
 
     private String name;
 
@@ -18,7 +19,7 @@ public class UpdateUserReq {
 
     private String address;
 
-    private int age;
+    private String birthDay;
 
     private String gender;
 }

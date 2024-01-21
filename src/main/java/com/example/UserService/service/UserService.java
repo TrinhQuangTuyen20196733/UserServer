@@ -1,13 +1,15 @@
 package com.example.UserService.service;
 
 
-import com.example.UserService.dto.request.ChangePasswordReq;
-import com.example.UserService.dto.request.RegisterReq;
+import com.example.UserService.dto.PageDTO;
+import com.example.UserService.dto.UserDTO;
+import com.example.UserService.dto.UserDetailDTO;
+import com.example.UserService.dto.request.*;
 
-import com.example.UserService.dto.request.UpdateUserReq;
 import com.example.UserService.dto.response.MessagesResponse;
 import com.example.UserService.entity.User;
 
+import java.text.ParseException;
 import java.util.Optional;
 
 public interface UserService {
@@ -24,9 +26,17 @@ public interface UserService {
 
     User findById(long Id);
 
-    RegisterReq getCurrentUser();
+    UserDTO getCurrentUser();
 
-    void updateUser(UpdateUserReq updateUserReq);
+    void updateUser(UpdateUserReq updateUserReq) throws ParseException;
 
     void changePassword(ChangePasswordReq changePasswordReq);
+
+    PageDTO<UserDTO> search(UserSearchReq userSearchReq);
+
+
+
+    UserDetailDTO getUserById(long userId);
+
+    void uploadAvatar(UploadAvatarReq uploadAvatarReq);
 }

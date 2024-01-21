@@ -1,6 +1,8 @@
 package com.example.UserService.controller;
 
 
+import com.example.UserService.client.ChatFeignClient;
+import com.example.UserService.client.request.ContactRequest;
 import com.example.UserService.dto.request.ConfirmOTP;
 import com.example.UserService.dto.request.RegisterReq;
 import com.example.UserService.dto.response.MessagesResponse;
@@ -11,6 +13,7 @@ import com.example.UserService.service.OTPService;
 import com.example.UserService.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -32,6 +35,8 @@ public class RegisterController {
     private final EmailService emailService;
 
     private final RedisTemplate<String, Object> redisTemplate;
+
+    private  final ChatFeignClient client;
 
 
 
@@ -70,7 +75,7 @@ public class RegisterController {
         ms.message = SUCCESS;
         String email = confirmOTP.getEmail();
         RegisterReq registerReq =   (RegisterReq) redisTemplate.opsForHash().get(email,email.hashCode());
-        redisTemplate.opsForHash().getOperations().delete(email);
+
         int otpnum = confirmOTP.getOtpNum();
         //Validate the Otp
         if (otpnum >= 0) {
@@ -80,9 +85,11 @@ public class RegisterController {
                     otpService.clearOTP(email);
                     //Save Account
                     try {
-                      keycloakService.createUser(registerReq);
-                       User user = userService.create(registerReq);
-
+                        User user = userService.create(registerReq);
+                        if (ObjectUtils.isNotEmpty(user)) {
+                            keycloakService.createUser(registerReq);
+                        }
+                        redisTemplate.opsForHash().getOperations().delete(email);
                     } catch (Exception e) {
                         ms.code = HttpStatus.INTERNAL_SERVER_ERROR.value();
                         ms.message = e.getMessage();
